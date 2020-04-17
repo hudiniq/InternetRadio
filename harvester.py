@@ -36,7 +36,7 @@ def fetch_img():
 
     img_url = img_tag[-1][5:]
     img_url = img_url[:-3]
-    print(img_url)
+    
     response = requests.get(img_url)
     img_data = BytesIO(response.content)
 

@@ -8,12 +8,10 @@ import vlc
 import time
 import harvester as H
 
-def app():
-    application = InternetRadio()
 
 class InternetRadio():
-    def __init__(self):
-        self.root = tk.Tk()
+    def __init__(self, root):
+        self.root = root
         self.root.geometry("600x70")
         self.root.resizable(0, 0)
 
@@ -25,10 +23,6 @@ class InternetRadio():
         self.state = True
         self.play_img = ImageTk.PhotoImage(file="play.png")
         self.pause_img = ImageTk.PhotoImage(file="pause.png")
-        self.play_button = None
-        self.cover = None
-        self.song = None
-        self.vol = None
 
         self.instance = vlc.Instance()
         self.media=self.instance.media_new(self.url)
@@ -36,12 +30,8 @@ class InternetRadio():
         self.player.set_media(self.media)
 
         H.fetch()
-        self.draw()
-        
-        self.root.mainloop()
-        H.kill()
 
-    def draw(self):        
+    def draw(self):
         self.play_button = tk.Button(self.canvas, image = self.play_img, command = self.play_pause)
         self.play_button.place(relx = 0, rely = 0, relwidth = 0.20, relheight = 1)
 
@@ -55,6 +45,8 @@ class InternetRadio():
         self.vol = tk.Scale(self.canvas, from_ = 100, to = 0, command=self.set_volume)
         self.vol.set(100)
         self.vol.place(relx = 0.93, relwidth = 0.5, relheight = 1)
+
+        self.refresher()
 
     def play_pause(self):
         if self.state is True:
@@ -70,15 +62,19 @@ class InternetRadio():
         value = self.vol.get()
         self.player.audio_set_volume(value)
 
-    # Avtomatsko ne dela, ce ga poklices zna posodobit pesem ampak skrije sliko. 
-    # def refresher(self):
-    #     self.img = ImageTk.PhotoImage(Image.open(H.fetch_img()).resize((84, 70), Image.ANTIALIAS))
+    def refresher(self):
+        self.img = ImageTk.PhotoImage(Image.open(H.fetch_img()).resize((84, 70), Image.ANTIALIAS))
+        self.cover.place(relx = 0.20, relwidth = 0.14, relheight = 1)
 
-    #     self.cover.configure(image = self.img)
-    #     self.song.configure(text = H.fetch_song())
+        self.cover.configure(image = self.img)
+        self.song.configure(text = H.fetch_song())
         
-    #     self.root.after(1000, self.refresher())
+        self.root.after(10000, self.refresher)
 
 
 if __name__ == "__main__":
-    app()
+    root = tk.Tk()
+    app = InternetRadio(root)
+    app.draw()
+    root.mainloop()
+    H.kill()
