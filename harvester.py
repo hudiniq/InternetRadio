@@ -29,8 +29,6 @@ class Harvester():
         self.res = requests.get(self.url)
         self.html_page = self.res.content
         self.soup = BeautifulSoup(self.html_page, "lxml")
-
-    # def fetch(self):
         
 
     def fetch_img(self):

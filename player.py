@@ -33,15 +33,15 @@ class InternetRadio():
 
         self.draw()
 
+
     def draw(self):
         self.play_button = tk.Button(self.canvas, image = self.play_img, command = self.play_pause)
         self.play_button.place(relx = 0, rely = 0, relwidth = 0.20, relheight = 1)
 
-        # self.img = ImageTk.PhotoImage(Image.open(H.fetch_img()).resize((84, 70), Image.ANTIALIAS))
         self.cover = tk.Label(self.canvas, image = None)
         self.cover.place(relx = 0.20, relwidth = 0.14, relheight = 1)
 
-        self.song = tk.Label(self.canvas, text = "Fetching Data")
+        self.song = tk.Label(self.canvas, text = "Fetching Data...")
         self.song.place(relx = 0.34, relwidth = 0.61, relheight = 1)
 
         self.vol = tk.Scale(self.canvas, from_ = 100, to = 0, command=self.set_volume)
@@ -82,7 +82,5 @@ if __name__ == "__main__":
     root = tk.Tk()
     app = InternetRadio(root)
     root.mainloop()
-    # thread1 = threading.Thread(target=app.draw(), daemon=True)
-    # thread2 = threading.Thread(target=root.mainloop())
     app.player.stop()
     app.H.kill()
