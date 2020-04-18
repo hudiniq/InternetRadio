@@ -7,7 +7,6 @@ from bs4 import BeautifulSoup
 from selenium import webdriver
 
 current_folder = pathlib.Path(__file__).parent.absolute()
-url = 'https://rockradio.si'
 
 options = webdriver.ChromeOptions()
 options.add_argument('--ignore-certificate-errors')
@@ -19,34 +18,39 @@ options.add_argument("--proxy-server='direct://'")
 options.add_argument("--proxy-bypass-list=*")
 options.add_argument("--start-maximized")
 options.add_argument('--headless')
-driver = webdriver.Chrome(str(current_folder) + "\\Chrome\\chromedriver.exe", chrome_options=options)
 
+class Harvester():
 
-def fetch():
-    driver.get(url)
+    def __init__(self):
+        self.url = 'https://rockradio.si'
+        self.driver = webdriver.Chrome(str(current_folder) + "\\Chrome\\chromedriver.exe", chrome_options=options)
+        self.driver.get(self.url)
 
-def fetch_img():
-    res = requests.get(url)
-    html_page = res.content
-    soup = BeautifulSoup(html_page, "lxml")
+        self.res = requests.get(self.url)
+        self.html_page = self.res.content
+        self.soup = BeautifulSoup(self.html_page, "lxml")
 
-    output_link = soup.find("img", {"class":"music-track-cover"})
-    # output_link = driver.find_element_by_css_selector('.music-track-cover').get_attribute('innerHTML')
-    img_tag = str(output_link).split()
+    # def fetch(self):
+        
 
-    img_url = img_tag[-1][5:]
-    img_url = img_url[:-3]
-    
-    response = requests.get(img_url)
-    img_data = BytesIO(response.content)
+    def fetch_img(self):
+        self.output_link = self.soup.find("img", {"class":"music-track-cover"})
+        # self.output_link = self.driver.find_element_by_css_selector('.music-track-cover').get_attribute('innerHTML')
+        self.img_tag = str(self.output_link).split()
 
-    return img_data
+        self.img_url = self.img_tag[-1][5:]
+        self.img_url = self.img_url[:-3]
+        
+        self.response = requests.get(self.img_url)
+        self.img_data = BytesIO(self.response.content)
 
-def fetch_song():
-    artist = str(driver.find_elements_by_css_selector('.music-track-artist')[1].text)
-    song = str(driver.find_elements_by_css_selector('.music-track-title')[1].text)
-    return artist + " - " + song
+        return self.img_data
 
-def kill():
-    driver.close()
-    driver.quit()
+    def fetch_song(self):
+        self.artist = str(self.driver.find_elements_by_css_selector('.music-track-artist')[1].text)
+        self.song = str(self.driver.find_elements_by_css_selector('.music-track-title')[1].text)
+        return self.artist + " - " + self.song
+
+    def kill(self):
+        self.driver.close()
+        self.driver.quit()

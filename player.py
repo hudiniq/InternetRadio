@@ -6,7 +6,8 @@ import tkinter as tk
 from PIL import Image, ImageTk
 import vlc
 import time
-import harvester as H
+import threading
+import harvester
 
 
 class InternetRadio():
@@ -29,24 +30,24 @@ class InternetRadio():
         self.player=self.instance.media_player_new()
         self.player.set_media(self.media)
 
-        H.fetch()
+        self.draw()
 
     def draw(self):
         self.play_button = tk.Button(self.canvas, image = self.play_img, command = self.play_pause)
         self.play_button.place(relx = 0, rely = 0, relwidth = 0.20, relheight = 1)
 
-        self.img = ImageTk.PhotoImage(Image.open(H.fetch_img()).resize((84, 70), Image.ANTIALIAS))
-        self.cover = tk.Label(self.canvas, image = self.img)
+        # self.img = ImageTk.PhotoImage(Image.open(H.fetch_img()).resize((84, 70), Image.ANTIALIAS))
+        self.cover = tk.Label(self.canvas, image = None)
         self.cover.place(relx = 0.20, relwidth = 0.14, relheight = 1)
 
-        self.song = tk.Label(self.canvas, text = H.fetch_song())
+        self.song = tk.Label(self.canvas, text = "Fetching Data")
         self.song.place(relx = 0.34, relwidth = 0.61, relheight = 1)
 
         self.vol = tk.Scale(self.canvas, from_ = 100, to = 0, command=self.set_volume)
         self.vol.set(100)
         self.vol.place(relx = 0.93, relwidth = 0.5, relheight = 1)
 
-        self.refresher()
+        self.root.after(1000, self.start_refresher)
 
     def play_pause(self):
         if self.state is True:
@@ -62,12 +63,16 @@ class InternetRadio():
         value = self.vol.get()
         self.player.audio_set_volume(value)
 
+    def start_refresher(self):
+        self.H = harvester.Harvester()
+        self.refresher()
+
     def refresher(self):
-        self.img = ImageTk.PhotoImage(Image.open(H.fetch_img()).resize((84, 70), Image.ANTIALIAS))
+        self.img = ImageTk.PhotoImage(Image.open(self.H.fetch_img()).resize((84, 70), Image.ANTIALIAS))
         self.cover.place(relx = 0.20, relwidth = 0.14, relheight = 1)
 
         self.cover.configure(image = self.img)
-        self.song.configure(text = H.fetch_song())
+        self.song.configure(text = self.H.fetch_song())
         
         self.root.after(10000, self.refresher)
 
@@ -75,6 +80,8 @@ class InternetRadio():
 if __name__ == "__main__":
     root = tk.Tk()
     app = InternetRadio(root)
-    app.draw()
     root.mainloop()
-    H.kill()
+    # thread1 = threading.Thread(target=app.draw(), daemon=True)
+    # thread2 = threading.Thread(target=root.mainloop())
+    app.player.stop()
+    app.H.kill()
