@@ -82,5 +82,7 @@ if __name__ == "__main__":
     root = tk.Tk()
     app = InternetRadio(root)
     root.mainloop()
+    # thread1 = threading.Thread(target=app.draw(), daemon=True)
+    # thread2 = threading.Thread(target=root.mainloop())
     app.player.stop()
     app.H.kill()
