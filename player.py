@@ -12,6 +12,7 @@ import harvester as H
 class InternetRadio():
     def __init__(self, root):
         self.root = root
+        self.root.wm_title("ROCK RADIO")
         self.root.geometry("600x70")
         self.root.resizable(0, 0)
 
@@ -77,4 +78,5 @@ if __name__ == "__main__":
     app = InternetRadio(root)
     app.draw()
     root.mainloop()
+    app.player.stop()
     H.kill()
