@@ -6,8 +6,8 @@ import tkinter as tk
 from PIL import Image, ImageTk
 import vlc
 import time
-import threading
-import harvester
+import requests
+from io import BytesIO
 
 
 class InternetRadio():
@@ -31,24 +31,24 @@ class InternetRadio():
         self.player=self.instance.media_player_new()
         self.player.set_media(self.media)
 
+        self.data()
         self.draw()
+        self.root.after(1000, self.refresher)
 
 
     def draw(self):
         self.play_button = tk.Button(self.canvas, image = self.play_img, command = self.play_pause)
         self.play_button.place(relx = 0, rely = 0, relwidth = 0.20, relheight = 1)
 
-        self.cover = tk.Label(self.canvas, image = None)
+        self.cover = tk.Label(self.canvas, image = self.img)
         self.cover.place(relx = 0.20, relwidth = 0.14, relheight = 1)
 
-        self.song = tk.Label(self.canvas, text = "Fetching Data...")
+        self.song = tk.Label(self.canvas, text = self.song_data)
         self.song.place(relx = 0.34, relwidth = 0.61, relheight = 1)
 
         self.vol = tk.Scale(self.canvas, from_ = 100, to = 0, command=self.set_volume)
         self.vol.set(100)
         self.vol.place(relx = 0.93, relwidth = 0.5, relheight = 1)
-
-        self.root.after(1000, self.start_refresher)
 
     def play_pause(self):
         if self.state is True:
@@ -64,16 +64,19 @@ class InternetRadio():
         value = self.vol.get()
         self.player.audio_set_volume(value)
 
-    def start_refresher(self):
-        self.H = harvester.Harvester()
-        self.refresher()
+    def data(self):
+        self.res = requests.post('http://rockradio.si/api/module/json/RadioSchedule/JsonModule/GetStreamInfo',
+                            data = {"RadioStreamId" : 1}).json()
+        self.song_data = self.res["data"][0]["titleArtist"]
+        self.img_url = self.res["data"][0]["picture"]
+        self.img_res = requests.get(self.img_url)
+        self.img_data = BytesIO(self.img_res.content)
+        self.img = ImageTk.PhotoImage(Image.open(self.img_data).resize((84, 70), Image.ANTIALIAS))
 
     def refresher(self):
-        self.img = ImageTk.PhotoImage(Image.open(self.H.fetch_img()).resize((84, 70), Image.ANTIALIAS))
-        self.cover.place(relx = 0.20, relwidth = 0.14, relheight = 1)
-
+        self.data()
         self.cover.configure(image = self.img)
-        self.song.configure(text = self.H.fetch_song())
+        self.song.configure(text = self.song_data)
         
         self.root.after(10000, self.refresher)
 
@@ -83,4 +86,3 @@ if __name__ == "__main__":
     app = InternetRadio(root)
     root.mainloop()
     app.player.stop()
-    app.H.kill()
