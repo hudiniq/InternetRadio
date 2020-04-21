@@ -20,8 +20,7 @@ class InternetRadio():
         self.canvas = tk.Canvas(self.root, height = 70, width = 600)
         self.canvas.pack()
 
-        self.url = "http://212.30.80.195:9034/rock"
-        #self.url = "http://145.14.14.93:9034/rock"
+        self.url = "http://stream.rockradio.si:9034/;stream/1"
         self.state = True
         self.play_img = ImageTk.PhotoImage(file="play.png")
         self.pause_img = ImageTk.PhotoImage(file="pause.png")
